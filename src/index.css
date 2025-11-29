@@ -1,0 +1,311 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@theme {
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  
+  --color-black: #000000;
+  --color-white: #ffffff;
+}
+
+* {
+  border-color: theme(colors.gray.800);
+}
+
+body {
+  background-color: theme(colors.black);
+  color: theme(colors.white);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.gradient-text {
+  background: linear-gradient(to right, theme(colors.white), theme(colors.gray.400));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.glass-panel {
+  background-color: rgb(23 23 23 / 0.5);
+  backdrop-filter: blur(8px);
+  border: 1px solid theme(colors.gray.800);
+  border-radius: 0.5rem;
+}
+
+.btn-primary {
+  padding: 0.75rem 1.5rem;
+  background-color: theme(colors.white);
+  color: theme(colors.black);
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: theme(colors.gray.200);
+}
+
+.btn-primary:active {
+  transform: scale(0.95);
+}
+
+.btn-secondary {
+  padding: 0.75rem 1.5rem;
+  background-color: theme(colors.gray.900);
+  color: theme(colors.white);
+  border: 1px solid theme(colors.gray.700);
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  background-color: theme(colors.gray.800);
+}
+
+.btn-secondary:active {
+  transform: scale(0.95);
+}
+
+.input-field {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: theme(colors.black);
+  border: 1px solid theme(colors.gray.800);
+  border-radius: 0.5rem;
+  color: theme(colors.white);
+  transition: border-color 0.2s;
+}
+
+.input-field::placeholder {
+  color: theme(colors.gray.500);
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: theme(colors.gray.600);
+}
+
+.card {
+  background-color: rgb(23 23 23 / 0.5);
+  backdrop-filter: blur(8px);
+  border: 1px solid theme(colors.gray.800);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+}
+
+.card:hover {
+  border-color: theme(colors.gray.700);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+/* Custom Scrollbar Styles */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: theme(colors.gray.700) theme(colors.gray.900);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: theme(colors.gray.900);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: theme(colors.gray.700);
+  border-radius: 3px;
+  transition: background 0.2s;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: theme(colors.gray.600);
+}
+
+/* Global scrollbar for the body */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: theme(colors.black);
+}
+
+::-webkit-scrollbar-thumb {
+  background: theme(colors.gray.800);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: theme(colors.gray.700);
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Selection color */
+::selection {
+  background-color: theme(colors.gray.700);
+  color: theme(colors.white);
+}
+
+::-moz-selection {
+  background-color: theme(colors.gray.700);
+  color: theme(colors.white);
+}
+
+/* Light Theme Overrides */
+.light-theme {
+  background-color: theme(colors.white);
+  color: theme(colors.black);
+}
+
+.light-theme .card {
+  background-color: rgb(255 255 255 / 0.9);
+  border-color: theme(colors.gray.300);
+}
+
+.light-theme .card:hover {
+  border-color: theme(colors.gray.400);
+}
+
+.light-theme .btn-primary {
+  background-color: theme(colors.black);
+  color: theme(colors.white);
+}
+
+.light-theme .btn-primary:hover {
+  background-color: theme(colors.gray.800);
+}
+
+.light-theme .btn-secondary {
+  background-color: theme(colors.gray.100);
+  color: theme(colors.black);
+  border-color: theme(colors.gray.300);
+}
+
+.light-theme .btn-secondary:hover {
+  background-color: theme(colors.gray.200);
+}
+
+.light-theme .input-field {
+  background-color: theme(colors.white);
+  border-color: theme(colors.gray.300);
+  color: theme(colors.black);
+}
+
+.light-theme .input-field:focus {
+  border-color: theme(colors.gray.500);
+}
+
+/* Consistent transition timings */
+.transition-standard {
+  transition: all 0.3s ease;
+}
+
+.transition-fast {
+  transition: all 0.15s ease;
+}
+
+.transition-slow {
+  transition: all 0.5s ease;
+}
+
+/* Focus visible for accessibility */
+*:focus-visible {
+  outline: 2px solid theme(colors.gray.500);
+  outline-offset: 2px;
+}
+
+/* Disabled state consistency */
+button:disabled,
+input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Light Theme Overrides */
+.light-theme {
+  color-scheme: light;
+}
+
+.light-theme body {
+  background-color: theme(colors.white);
+  color: theme(colors.black);
+}
+
+.light-theme .gradient-text {
+  background: linear-gradient(to right, theme(colors.black), theme(colors.gray.600));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.light-theme .glass-panel {
+  background-color: rgb(245 245 245 / 0.8);
+  border-color: theme(colors.gray.300);
+}
+
+.light-theme .card {
+  background-color: rgb(255 255 255 / 0.8);
+  border-color: theme(colors.gray.300);
+}
+
+.light-theme .card:hover {
+  border-color: theme(colors.gray.400);
+}
+
+.light-theme .btn-primary {
+  background-color: theme(colors.black);
+  color: theme(colors.white);
+}
+
+.light-theme .btn-primary:hover {
+  background-color: theme(colors.gray.800);
+}
+
+.light-theme .btn-secondary {
+  background-color: theme(colors.gray.100);
+  color: theme(colors.black);
+  border-color: theme(colors.gray.300);
+}
+
+.light-theme .btn-secondary:hover {
+  background-color: theme(colors.gray.200);
+}
+
+.light-theme .input-field {
+  background-color: theme(colors.white);
+  border-color: theme(colors.gray.300);
+  color: theme(colors.black);
+}
+
+.light-theme .input-field:focus {
+  border-color: theme(colors.gray.500);
+}
+
+.light-theme ::selection {
+  background-color: theme(colors.gray.300);
+  color: theme(colors.black);
+}
+
+.light-theme ::-webkit-scrollbar-track {
+  background: theme(colors.white);
+}
+
+.light-theme ::-webkit-scrollbar-thumb {
+  background: theme(colors.gray.300);
+}
+
+.light-theme ::-webkit-scrollbar-thumb:hover {
+  background: theme(colors.gray.400);
+}

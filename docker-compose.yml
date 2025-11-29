@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  # Hyperledger Identus Cloud Agent
+  # DID Resolver that communicates with Cardano blockchain
+  identus-agent:
+    image: ghcr.io/hyperledger/identus-cloud-agent:latest
+    container_name: identus-cloud-agent
+    ports:
+      - "8080:8080"  # API port
+      - "8090:8090"  # Admin port
+    environment:
+      # Cardano Network Configuration
+      - CARDANO_NETWORK=preprod  # Use 'mainnet' for production
+      - CARDANO_NODE_HOST=cardano-node
+      - CARDANO_NODE_PORT=3001
+      
+      # Database Configuration (optional, uses in-memory by default)
+      # - DATABASE_HOST=postgres
+      # - DATABASE_PORT=5432
+      # - DATABASE_NAME=identus
+      # - DATABASE_USER=identus
+      # - DATABASE_PASSWORD=changeme
+      
+      # Logging
+      - LOG_LEVEL=INFO
+      
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    networks:
+      - identus-network
+    restart: unless-stopped
+
+  # Optional: PostgreSQL database for persistent storage
+  # Uncomment if you want to persist DID data
+  # postgres:
+  #   image: postgres:15-alpine
+  #   container_name: identus-postgres
+  #   environment:
+  #     - POSTGRES_DB=identus
+  #     - POSTGRES_USER=identus
+  #     - POSTGRES_PASSWORD=changeme
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres-data:/var/lib/postgresql/data
+  #   networks:
+  #     - identus-network
+  #   restart: unless-stopped
+
+  # Optional: Cardano Node (for full on-chain DID resolution)
+  # Warning: Requires ~15GB disk space and syncing time
+  # cardano-node:
+  #   image: inputoutput/cardano-node:latest
+  #   container_name: cardano-node
+  #   environment:
+  #     - NETWORK=preprod
+  #   ports:
+  #     - "3001:3001"
+  #   volumes:
+  #     - cardano-node-data:/data
+  #   networks:
+  #     - identus-network
+  #   restart: unless-stopped
+
+networks:
+  identus-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  cardano-node-data:
