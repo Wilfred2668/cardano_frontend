@@ -8,6 +8,7 @@ from config import settings
 from auth.challenge_store import challenge_store
 from auth.cardano_verifier import cardano_verifier  # Use Cardano verifier (no Docker needed)
 from auth.jwt_utils import create_access_token
+from routes.campaigns import router as campaigns_router
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -24,6 +25,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include routers
+app.include_router(campaigns_router)
 
 # ============================================================
 # Pydantic Models

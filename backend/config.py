@@ -20,6 +20,9 @@ class Settings(BaseSettings):
     # CORS Origins
     CORS_ORIGINS: list = ["http://localhost:5173", "http://localhost:3000"]
     
+    # External Job API
+    JOB_API_URL: str = "https://dac99f68ab3e.ngrok-free.app/start_job"
+    
     class Config:
         env_file = ".env"
         case_sensitive = True

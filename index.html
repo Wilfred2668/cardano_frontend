@@ -5,6 +5,13 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>rize_wil</title>
+    <script>
+      window.global = window;
+      window.process = window.process || {};
+      window.process.env = window.process.env || {};
+      window.process.version = 'v16.0.0';
+      window.process.versions = { node: '16.0.0' };
+    </script>
   </head>
   <body>
     <div id="root"></div>

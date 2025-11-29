@@ -5,6 +5,8 @@ import { WalletProvider } from './contexts/WalletContext';
 import { DIDProvider } from './contexts/DIDContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { CampaignProvider } from './contexts/CampaignContext';
+import { CardanoWalletProvider } from './contexts/CardanoWalletContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import Login from './pages/Login';
 // DID Authentication
@@ -13,6 +15,7 @@ import DIDSetupWizard from './pages/DIDSetupWizard';
 // Dashboard Pages
 import Dashboard from './pages/Dashboard';
 import Stats from './pages/Campaigns';
+import CreateCampaign from './pages/CreateCampaign';
 import Wallet from './pages/Wallet';
 import Settings from './pages/Settings';
 import Extras from './pages/Extras';
@@ -97,6 +100,17 @@ const AppContent = () => {
             />
             
             <Route 
+              path="/create-campaign" 
+              element={
+                <ProtectedRoute>
+                  <motion.div {...pageTransition}>
+                    <CreateCampaign />
+                  </motion.div>
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
               path="/wallet" 
               element={
                 <ProtectedRoute>
@@ -148,9 +162,13 @@ function App() {
             <WalletProvider>
               <DIDProvider>
                 <ToastProvider>
-                  <div className="min-h-screen bg-black dark:bg-black light-theme:bg-white text-white dark:text-white light-theme:text-black transition-colors">
-                    <AppContent />
-                  </div>
+                  <CampaignProvider>
+                    <CardanoWalletProvider>
+                      <div className="min-h-screen bg-black dark:bg-black light-theme:bg-white text-white dark:text-white light-theme:text-black transition-colors">
+                        <AppContent />
+                      </div>
+                    </CardanoWalletProvider>
+                  </CampaignProvider>
                 </ToastProvider>
               </DIDProvider>
             </WalletProvider>
