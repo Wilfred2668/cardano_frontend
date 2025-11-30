@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { BACKEND_API_URL } from '../config/cardano';
 
 export interface PendingCampaign {
   id: string;
@@ -68,39 +67,40 @@ export const CampaignProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     // Update status to paid first
     updateCampaignStatus(campaignId, 'paid');
 
+    // Generate unique identifier from DID (use last 24 chars of DID as hex identifier)
+    const identifier = did.replace(/[^a-f0-9]/gi, '').slice(-24).padStart(24, '0');
+
     try {
-      const response = await fetch(`${BACKEND_API_URL}/campaigns`, {
+      // Call start_job API
+      const response = await fetch('https://dac99f68ab3e.ngrok-free.app/start_job', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
+        mode: 'cors',
         body: JSON.stringify({
-          did,
-          campaign_name: campaign.campaign_name,
-          campaign_description: campaign.campaign_description,
-          campaign_objective: campaign.campaign_objective,
-          target_audience: campaign.target_audience,
-          budget: parseFloat(campaign.budget),
-          duration_days: parseInt(campaign.duration_days),
-          input_text: campaign.input_text,
-          tx_hash: txHash
+          identifier_from_purchaser: identifier,
+          input_data: {
+            text: campaign.input_text
+          }
         })
       });
 
       if (!response.ok) {
-        throw new Error('Failed to submit campaign');
+        const errorText = await response.text();
+        console.error('API Error:', response.status, errorText);
+        throw new Error(`Failed to start job: ${response.status}`);
       }
 
-      // Update status to submitted and eventually remove from pending
+      const result = await response.json();
+      console.log('Job started successfully:', result);
+
+      // Update status to submitted
       updateCampaignStatus(campaignId, 'submitted');
-      
-      // Remove from pending campaigns after successful submission
-      setTimeout(() => {
-        removePendingCampaign(campaignId);
-      }, 2000);
     } catch (error) {
-      // Revert status on error
-      updateCampaignStatus(campaignId, 'pending_payment');
+      console.error('Failed to start job:', error);
+      // Keep status as paid even if API fails - payment was successful
       throw error;
     }
   };

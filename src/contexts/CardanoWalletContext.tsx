@@ -1,11 +1,12 @@
 import React, { createContext, useContext, useState } from 'react';
-import { Lucid, Koios, type LucidEvolution } from '@lucid-evolution/lucid';
+import { Lucid, Blockfrost, type LucidEvolution } from '@lucid-evolution/lucid';
 
 interface CardanoWalletState {
   lucid: LucidEvolution | null;
   address: string | null;
   connected: boolean;
   connecting: boolean;
+  walletApi: any | null;
 }
 
 interface CardanoWalletContextType extends CardanoWalletState {
@@ -20,8 +21,25 @@ export const CardanoWalletProvider: React.FC<{ children: React.ReactNode }> = ({
     lucid: null,
     address: null,
     connected: false,
-    connecting: false
+    connecting: false,
+    walletApi: null
   });
+
+  // Auto-reconnect on mount if wallet was previously connected
+  React.useEffect(() => {
+    const autoReconnect = async () => {
+      const savedAddress = localStorage.getItem('cardano_wallet_address');
+      if (savedAddress) {
+        try {
+          await connectWallet();
+        } catch (error) {
+          console.log('Auto-reconnect failed:', error);
+          localStorage.removeItem('cardano_wallet_address');
+        }
+      }
+    };
+    autoReconnect();
+  }, []);
 
   const connectWallet = async () => {
     setState(prev => ({ ...prev, connecting: true }));
@@ -33,13 +51,21 @@ export const CardanoWalletProvider: React.FC<{ children: React.ReactNode }> = ({
         throw new Error('Eternl wallet not found. Please install Eternl browser extension.');
       }
 
-      // Enable Eternl wallet
-      const api = await cardano.eternl.enable();
+      // Check if wallet is already enabled
+      const isEnabled = await cardano.eternl.isEnabled();
+      console.log('Wallet already enabled:', isEnabled);
 
-      // Initialize Lucid with Koios provider (free, no API key needed)
+      // Enable Eternl wallet (this will prompt user if not already enabled)
+      const api = await cardano.eternl.enable();
+      console.log('Wallet API enabled:', api);
+
+      // Initialize Lucid with Blockfrost provider
       const lucid = await Lucid(
-        new Koios('https://preview.koios.rest/api/v1'),
-        'Preview'
+        new Blockfrost(
+          'https://cardano-preprod.blockfrost.io/api/v0',
+          'preprod2h4kWjYDXOimqTbfPwr0Vxs3eslDxRd9'
+        ),
+        'Preprod'
       );
 
       // Select wallet
@@ -52,8 +78,12 @@ export const CardanoWalletProvider: React.FC<{ children: React.ReactNode }> = ({
         lucid,
         address,
         connected: true,
-        connecting: false
+        connecting: false,
+        walletApi: api
       });
+
+      // Save to localStorage for auto-reconnect
+      localStorage.setItem('cardano_wallet_address', address);
 
       console.log('Wallet connected:', address);
     } catch (error: any) {
@@ -68,8 +98,12 @@ export const CardanoWalletProvider: React.FC<{ children: React.ReactNode }> = ({
       lucid: null,
       address: null,
       connected: false,
-      connecting: false
+      connecting: false,
+      walletApi: null
     });
+    
+    // Remove from localStorage
+    localStorage.removeItem('cardano_wallet_address');
   };
 
   return (

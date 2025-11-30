@@ -1,12 +1,62 @@
 import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../auth/AuthContext';
 
 export default function Settings() {
   const { did } = useAuth();
+  const [userName, setUserName] = useState('');
+  const [walletAddress, setWalletAddress] = useState('');
+
+  // Fetch data from localStorage on mount
+  useEffect(() => {
+    const profileData = localStorage.getItem('rize_user_profile');
+    if (profileData) {
+      const profile = JSON.parse(profileData);
+      setUserName(profile.userName || '');
+    }
+
+    const cardanoAddress = localStorage.getItem('cardano_wallet_address');
+    if (cardanoAddress) {
+      setWalletAddress(cardanoAddress);
+    }
+  }, []);
+
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    alert(`${label} copied to clipboard!`);
+  };
+
+  const handleExportDID = () => {
+    if (!did) {
+      alert('No DID available to export');
+      return;
+    }
+
+    const didData = {
+      did: did,
+      userName: userName,
+      walletAddress: walletAddress,
+      exportedAt: new Date().toISOString(),
+      network: 'Preprod'
+    };
+
+    const dataStr = JSON.stringify(didData, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `did-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    alert('DID backup downloaded successfully!');
+  };
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -18,8 +68,10 @@ export default function Settings() {
             <p className="text-gray-400">Manage your account and preferences</p>
           </div>
 
-          {/* User Information Card */}
-          <div className="card space-y-6">
+          {/* Cards Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* User Information Card */}
+            <div className="card space-y-6">
             <h2 className="text-xl font-semibold">User Information</h2>
 
             <div className="space-y-4">
@@ -35,7 +87,11 @@ export default function Settings() {
                     readOnly
                     className="flex-1 px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg font-mono text-sm text-gray-400"
                   />
-                  <button className="p-3 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700 transition-colors">
+                  <button 
+                    onClick={() => did && copyToClipboard(did, 'DID')}
+                    disabled={!did}
+                    className="p-3 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                     </svg>
@@ -46,58 +102,62 @@ export default function Settings() {
                 </p>
               </div>
 
-              {/* Email */}
+              {/* Username */}
               <div>
                 <label className="block text-sm font-medium text-gray-400 mb-2">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  placeholder="user@example.com"
-                  className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:border-white focus:outline-none"
-                />
-                <p className="text-xs text-gray-500 mt-2">
-                  Will be stored in backend (not implemented yet)
-                </p>
-              </div>
-
-              {/* Name */}
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">
-                  Full Name
+                  Username
                 </label>
                 <input
                   type="text"
-                  placeholder="John Doe"
-                  className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:border-white focus:outline-none"
+                  value={userName}
+                  readOnly
+                  className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-gray-400"
                 />
                 <p className="text-xs text-gray-500 mt-2">
-                  Will be stored in backend (not implemented yet)
+                  Your display name
                 </p>
               </div>
+
+              {/* Wallet Address */}
+              {walletAddress && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-2">
+                    Connected Wallet Address
+                  </label>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      value={walletAddress}
+                      readOnly
+                      className="flex-1 px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg font-mono text-xs text-gray-400"
+                    />
+                    <button 
+                      onClick={() => copyToClipboard(walletAddress, 'Wallet address')}
+                      className="p-3 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700 transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Your Cardano Preprod testnet address
+                  </p>
+                </div>
+              )}
+            </div>
             </div>
 
-            <div className="pt-4 border-t border-gray-800">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="btn-primary px-6 py-3"
-                disabled
+            {/* Account Actions Card */}
+            <div className="card space-y-4">
+                <h2 className="text-xl font-semibold">Account Actions</h2>
+              
+              <div className="space-y-3">
+                <button 
+                onClick={handleExportDID}
+                disabled={!did}
+                className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg hover:bg-gray-800 transition-colors text-left flex items-center justify-between disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Save Changes
-              </motion.button>
-              <p className="text-xs text-gray-500 mt-3">
-                Settings functionality will be implemented with backend integration
-              </p>
-            </div>
-          </div>
-
-          {/* Account Actions Card */}
-          <div className="card space-y-4">
-            <h2 className="text-xl font-semibold">Account Actions</h2>
-            
-            <div className="space-y-3">
-              <button className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg hover:bg-gray-800 transition-colors text-left flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
@@ -107,19 +167,8 @@ export default function Settings() {
                 <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
-              </button>
-
-              <button className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg hover:bg-gray-800 transition-colors text-left flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                  </svg>
-                  <span>Change Password</span>
-                </div>
-                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
+                </button>
+              </div>
             </div>
           </div>
         </motion.div>

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 export default function Extras() {
   return (
     <div className="min-h-screen bg-black text-white">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

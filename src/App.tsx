@@ -53,7 +53,7 @@ const AppContent = () => {
       {!isAuthPage && <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />}
       {!isAuthPage && <Navbar sidebarOpen={sidebarOpen} />}
       <div className={!isAuthPage ? `pt-20 transition-all duration-300 ${sidebarOpen ? 'lg:ml-64' : 'lg:ml-20'}` : ''}>
-        <div className={!isAuthPage ? 'p-4' : ''}>
+        <div className={!isAuthPage ? 'p-8' : ''}>
           <AnimatePresence mode="wait">
           <Routes>
             {/* Landing Page */}

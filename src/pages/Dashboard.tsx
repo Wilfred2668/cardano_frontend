@@ -33,7 +33,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -70,34 +70,42 @@ export default function Dashboard() {
             </div>
           </motion.div>
 
-          {/* Pending Campaigns (Awaiting Payment) */}
-          {pendingCampaigns.filter(c => c.status === 'pending_payment').map((campaign) => (
+          {/* All Campaigns */}
+          {pendingCampaigns.map((campaign) => (
             <motion.div
               key={campaign.id}
               variants={itemVariants}
               onClick={() => setSelectedCampaign(campaign)}
               className="card border-gray-700 bg-gray-900/50 transition-all min-h-[200px] flex flex-col justify-between p-6 relative cursor-pointer hover:border-white"
             >
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (confirm('Are you sure you want to delete this campaign?')) {
-                    removePendingCampaign(campaign.id);
-                  }
-                }}
-                className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors z-10"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-              </button>
+              {campaign.status === 'pending_payment' && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (confirm('Are you sure you want to delete this campaign?')) {
+                      removePendingCampaign(campaign.id);
+                    }
+                  }}
+                  className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors z-10"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              )}
               <div className="flex-1">
                 <div className="flex items-start justify-between mb-3 pr-8">
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-lg mb-1 truncate">{campaign.campaign_name}</h3>
                     <p className="text-gray-400 text-sm line-clamp-2">{campaign.campaign_description}</p>
                   </div>
-                  <span className="px-2 py-1 text-xs bg-gray-800 text-gray-400 rounded-full whitespace-nowrap ml-2">Pending</span>
+                  <span className={`px-2 py-1 text-xs rounded-full whitespace-nowrap ml-2 ${
+                    campaign.status === 'paid' 
+                      ? 'bg-green-900/50 text-green-400' 
+                      : 'bg-gray-800 text-gray-400'
+                  }`}>
+                    {campaign.status === 'paid' ? 'Ongoing' : 'Pending'}
+                  </span>
                 </div>
                 <div className="space-y-1 text-sm text-gray-500">
                   {campaign.budget && (
@@ -111,15 +119,21 @@ export default function Dashboard() {
                   )}
                 </div>
               </div>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setPaymentCampaign(campaign);
-                }}
-                className="w-full mt-4 bg-white hover:bg-gray-200 text-black font-medium py-2 px-4 rounded-lg transition-colors"
-              >
-                Complete Payment
-              </button>
+              {campaign.status === 'pending_payment' ? (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setPaymentCampaign(campaign);
+                  }}
+                  className="w-full mt-4 bg-white hover:bg-gray-200 text-black font-medium py-2 px-4 rounded-lg transition-colors"
+                >
+                  Complete Payment
+                </button>
+              ) : (
+                <div className="w-full mt-4 bg-green-900/30 border border-green-700 text-green-400 font-medium py-2 px-4 rounded-lg text-center">
+                  Campaign Ongoing
+                </div>
+              )}
             </motion.div>
           ))}
         </motion.div>
@@ -139,10 +153,10 @@ export default function Dashboard() {
             try {
               await submitCampaign(paymentCampaign.id, txHash, did);
               setPaymentCampaign(null);
-              alert('Campaign submitted successfully!');
+              alert('Payment successful! Transaction Hash: ' + txHash);
             } catch (error) {
-              console.error('Failed to submit campaign:', error);
-              alert('Failed to submit campaign. Please try again.');
+              console.error('Failed to process payment:', error);
+              alert('Payment processed but failed to update campaign status.');
             }
           }}
         />
@@ -169,7 +183,13 @@ export default function Dashboard() {
               <div className="sticky top-0 bg-gray-900 border-b border-gray-800 p-6 flex items-start justify-between">
                 <div className="flex-1">
                   <h2 className="text-2xl font-bold mb-2">{selectedCampaign.campaign_name}</h2>
-                  <span className="px-3 py-1 text-xs bg-gray-800 text-gray-400 rounded-full">Pending Payment</span>
+                  <span className={`px-3 py-1 text-xs rounded-full ${
+                    selectedCampaign.status === 'paid'
+                      ? 'bg-green-900/50 text-green-400'
+                      : 'bg-gray-800 text-gray-400'
+                  }`}>
+                    {selectedCampaign.status === 'paid' ? 'Campaign Ongoing' : 'Pending Payment'}
+                  </span>
                 </div>
                 <button
                   onClick={() => setSelectedCampaign(null)}
@@ -232,26 +252,37 @@ export default function Dashboard() {
 
               {/* Footer Actions */}
               <div className="sticky bottom-0 bg-gray-900 border-t border-gray-800 p-6 flex gap-3">
-                <button
-                  onClick={() => {
-                    if (confirm('Are you sure you want to delete this campaign?')) {
-                      removePendingCampaign(selectedCampaign.id);
-                      setSelectedCampaign(null);
-                    }
-                  }}
-                  className="flex-1 bg-gray-800 hover:bg-gray-700 text-white font-medium py-3 px-6 rounded-lg transition-colors"
-                >
-                  Delete Campaign
-                </button>
-                <button
-                  onClick={() => {
-                    setPaymentCampaign(selectedCampaign);
-                    setSelectedCampaign(null);
-                  }}
-                  className="flex-1 bg-white hover:bg-gray-200 text-black font-medium py-3 px-6 rounded-lg transition-colors"
-                >
-                  Complete Payment
-                </button>
+                {selectedCampaign.status === 'pending_payment' ? (
+                  <>
+                    <button
+                      onClick={() => {
+                        if (confirm('Are you sure you want to delete this campaign?')) {
+                          removePendingCampaign(selectedCampaign.id);
+                          setSelectedCampaign(null);
+                        }
+                      }}
+                      className="flex-1 bg-gray-800 hover:bg-gray-700 text-white font-medium py-3 px-6 rounded-lg transition-colors"
+                    >
+                      Delete Campaign
+                    </button>
+                    <button
+                      onClick={() => {
+                        setPaymentCampaign(selectedCampaign);
+                        setSelectedCampaign(null);
+                      }}
+                      className="flex-1 bg-white hover:bg-gray-200 text-black font-medium py-3 px-6 rounded-lg transition-colors"
+                    >
+                      Complete Payment
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => setSelectedCampaign(null)}
+                    className="flex-1 bg-gray-800 hover:bg-gray-700 text-white font-medium py-3 px-6 rounded-lg transition-colors"
+                  >
+                    Close
+                  </button>
+                )}
               </div>
             </motion.div>
           </motion.div>

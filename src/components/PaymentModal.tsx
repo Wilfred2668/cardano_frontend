@@ -12,7 +12,7 @@ interface PaymentModalProps {
 }
 
 export default function PaymentModal({ campaign, isOpen, onClose, onSuccess }: PaymentModalProps) {
-  const { lucid, address, connected, connecting, connectWallet } = useCardanoWallet();
+  const { lucid, address, connected, connecting, connectWallet, walletApi } = useCardanoWallet();
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,6 +36,11 @@ export default function PaymentModal({ campaign, isOpen, onClose, onSuccess }: P
       return;
     }
 
+    if (!walletApi) {
+      setError('Wallet API not available. Please reconnect your wallet.');
+      return;
+    }
+
     setProcessing(true);
     setError(null);
 
@@ -44,6 +49,10 @@ export default function PaymentModal({ campaign, isOpen, onClose, onSuccess }: P
       if (isNaN(budgetADA) || budgetADA <= 0) {
         throw new Error('Invalid budget amount');
       }
+
+      // Re-select wallet before transaction to ensure fresh connection
+      console.log('Re-selecting wallet API...');
+      lucid.selectWallet.fromAPI(walletApi);
 
       // Check wallet has UTxOs
       const utxos = await lucid.wallet().getUtxos();
@@ -127,7 +136,7 @@ export default function PaymentModal({ campaign, isOpen, onClose, onSuccess }: P
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-400">Network</span>
-                <span className="text-white">Preview Testnet</span>
+                <span className="text-white">Preprod Testnet</span>
               </div>
               <div className="flex flex-col gap-1">
                 <span className="text-gray-400">Receiver</span>

@@ -107,15 +107,14 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
               onClick={() => setIsOpen(!isOpen)}
               className="hidden lg:flex w-10 h-10 items-center justify-center bg-gray-900 border border-gray-700 rounded-lg hover:bg-gray-800 transition-colors group"
             >
-              <motion.svg
-                animate={{ rotate: isOpen ? 0 : 180 }}
+              <svg
                 className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </motion.svg>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
             </button>
             
             {/* Mobile close button */}
