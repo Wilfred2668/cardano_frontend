@@ -1,8 +1,11 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useCardanoWallet } from '../contexts/CardanoWalletContext';
+import AnimatedBackground from '../components/AnimatedBackground';
+import { useToast } from '../contexts/ToastContext';
 
 export default function Wallet() {
+  const { showToast } = useToast();
   const { lucid, address, connected, connecting, connectWallet, disconnectWallet } = useCardanoWallet();
   const [balance, setBalance] = useState<string>('0');
   const [loadingBalance, setLoadingBalance] = useState(false);
@@ -36,7 +39,7 @@ export default function Wallet() {
       await connectWallet();
     } catch (error: any) {
       console.error('Failed to connect wallet:', error);
-      alert('Failed to connect wallet: ' + error.message);
+      showToast('Failed to connect wallet: ' + error.message, 'error');
     }
   };
 
@@ -53,21 +56,25 @@ export default function Wallet() {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    alert('Address copied to clipboard!');
+    showToast('Address copied to clipboard!', 'success');
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="max-w-7xl">
+    <div className="min-h-screen bg-black text-white relative overflow-hidden">
+      <AnimatedBackground />
+      <div className="max-w-4xl relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="space-y-8"
         >
           {/* Header */}
-          <div>
-            <h1 className="text-4xl font-bold mb-2">Wallet</h1>
-            <p className="text-gray-400">Connect your Cardano wallet to manage assets</p>
+          <div className="flex items-center gap-4">
+            <img src="/crypto.svg" alt="Crypto" className="w-16 h-16 opacity-70" />
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Wallet</h1>
+              <p className="text-gray-400">Connect your Cardano wallet to manage assets</p>
+            </div>
           </div>
 
           {/* Cards Grid */}

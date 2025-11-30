@@ -1,8 +1,11 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../auth/AuthContext';
+import AnimatedBackground from '../components/AnimatedBackground';
+import { useToast } from '../contexts/ToastContext';
 
 export default function Settings() {
+  const { showToast } = useToast();
   const { did } = useAuth();
   const [userName, setUserName] = useState('');
   const [walletAddress, setWalletAddress] = useState('');
@@ -23,12 +26,12 @@ export default function Settings() {
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
-    alert(`${label} copied to clipboard!`);
+    showToast(`${label} copied to clipboard!`, 'success');
   };
 
   const handleExportDID = () => {
     if (!did) {
-      alert('No DID available to export');
+      showToast('No DID available to export', 'error');
       return;
     }
 
@@ -50,13 +53,12 @@ export default function Settings() {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    
-    alert('DID backup downloaded successfully!');
-  };
 
-  return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="max-w-4xl">
+    showToast('DID backup downloaded successfully!', 'success');
+  };  return (
+    <div className="min-h-screen bg-black text-white relative overflow-hidden">
+      <AnimatedBackground />
+      <div className="max-w-4xl relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

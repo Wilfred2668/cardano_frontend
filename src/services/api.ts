@@ -8,6 +8,7 @@ import type {
   ContentVariant,
   CampaignStrategy
 } from '../types';
+import { apiGet, apiPost } from '../utils/apiClient';
 
 // ===================================================================
 // API CONFIGURATION
@@ -24,6 +25,7 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 // ===================================================================
 // Helper function for switching between mock and real API calls
 // Currently commented out - uncomment when ready to integrate with real backend
+// All real API calls will automatically include JWT token via apiGet/apiPost from apiClient
 /*
 async function apiCall<T>(
   endpoint: string,
@@ -34,12 +36,24 @@ async function apiCall<T>(
     return mockFn();
   }
   
-  // Real API call (for future backend integration)
-  const response = await fetch(`${BASE_URL}${endpoint}`, options);
-  if (!response.ok) {
-    throw new Error(`API Error: ${response.statusText}`);
+  // Real API call (for future backend integration) - automatically includes JWT token
+  const data = await apiGet(`${BASE_URL}${endpoint}`, options);
+  return data;
+}
+
+// Example of using tokenized POST request:
+async function apiPostCall<T>(
+  endpoint: string,
+  mockFn: () => Promise<T>,
+  body?: any,
+  options?: RequestInit
+): Promise<T> {
+  if (USE_MOCK) {
+    return mockFn();
   }
-  const data = await response.json();
+  
+  // Real API call with authentication
+  const data = await apiPost(`${BASE_URL}${endpoint}`, body, options);
   return data;
 }
 */

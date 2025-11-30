@@ -1,5 +1,6 @@
 import { Navigate } from 'react-router-dom';
 import { useWallet } from '../contexts/WalletContext';
+import { useAuth } from '../auth/AuthContext';
 import type { ReactNode } from 'react';
 
 interface ProtectedRouteProps {
@@ -8,8 +9,10 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { walletAddress } = useWallet();
+  const { isAuthenticated } = useAuth();
 
-  if (!walletAddress) {
+  // Require both wallet connection and JWT authentication
+  if (!walletAddress || !isAuthenticated) {
     return <Navigate to="/" replace />;
   }
 

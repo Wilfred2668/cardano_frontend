@@ -8,6 +8,8 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { CampaignProvider } from './contexts/CampaignContext';
 import { CardanoWalletProvider } from './contexts/CardanoWalletContext';
 import ErrorBoundary from './components/ErrorBoundary';
+import ScrollToTop from './components/ScrollToTop';
+import PageTransition from './components/PageTransition';
 import Login from './pages/Login';
 // DID Authentication
 import { AuthProvider, useAuth } from './auth/AuthContext';
@@ -52,10 +54,11 @@ const AppContent = () => {
     <>
       {!isAuthPage && <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />}
       {!isAuthPage && <Navbar sidebarOpen={sidebarOpen} />}
-      <div className={!isAuthPage ? `pt-20 transition-all duration-300 ${sidebarOpen ? 'lg:ml-64' : 'lg:ml-20'}` : ''}>
-        <div className={!isAuthPage ? 'p-8' : ''}>
-          <AnimatePresence mode="wait">
-          <Routes>
+      <PageTransition>
+        <div className={!isAuthPage ? `pt-20 transition-all duration-300 ${sidebarOpen ? 'lg:ml-64' : 'lg:ml-20'}` : ''}>
+          <div className={!isAuthPage ? 'p-8' : ''}>
+            <AnimatePresence mode="wait">
+            <Routes>
             {/* Landing Page */}
             <Route 
               path="/" 
@@ -149,6 +152,7 @@ const AppContent = () => {
         </AnimatePresence>
         </div>
       </div>
+      </PageTransition>
     </>
   );
 };
@@ -157,6 +161,7 @@ function App() {
   return (
     <ErrorBoundary>
       <Router>
+        <ScrollToTop />
         <ThemeProvider>
           <AuthProvider>
             <WalletProvider>

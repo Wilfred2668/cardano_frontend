@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { useCampaign } from '../contexts/CampaignContext';
 import { useMemo } from 'react';
+import AnimatedBackground from '../components/AnimatedBackground';
 
 export default function Stats() {
   const { pendingCampaigns } = useCampaign();
@@ -52,16 +53,22 @@ export default function Stats() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="max-w-7xl">
+    <div className="min-h-screen bg-black text-white relative overflow-hidden">
+      <AnimatedBackground />
+      <div className="max-w-7xl relative z-10">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <h1 className="text-4xl font-bold mb-2">Campaign Statistics</h1>
-          <p className="text-gray-400">Track your campaign performance and spending</p>
+          <div className="flex items-center gap-4 mb-4">
+            <img src="/add.svg" alt="Advertising" className="w-16 h-16 opacity-70" />
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Campaign Statistics</h1>
+              <p className="text-gray-400">Track your campaign performance and spending</p>
+            </div>
+          </div>
         </motion.div>
 
         <motion.div

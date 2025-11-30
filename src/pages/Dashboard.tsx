@@ -4,10 +4,13 @@ import { useState } from 'react';
 import { useCampaign, type PendingCampaign } from '../contexts/CampaignContext';
 import PaymentModal from '../components/PaymentModal';
 import { useDID } from '../contexts/DIDContext';
+import AnimatedBackground from '../components/AnimatedBackground';
+import { useToast } from '../contexts/ToastContext';
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { pendingCampaigns, removePendingCampaign, submitCampaign } = useCampaign();
+  const { showToast } = useToast();
+  const { pendingCampaigns, removePendingCampaign, submitCampaign, checkJobStatus } = useCampaign();
   const { did } = useDID();
   const [selectedCampaign, setSelectedCampaign] = useState<PendingCampaign | null>(null);
   const [paymentCampaign, setPaymentCampaign] = useState<PendingCampaign | null>(null);
@@ -32,8 +35,9 @@ export default function Dashboard() {
   const profile = profileData ? JSON.parse(profileData) : null;
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="max-w-7xl">
+    <div className="min-h-screen bg-black text-white relative overflow-hidden">
+      <AnimatedBackground />
+      <div className="max-w-7xl relative z-10">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -100,11 +104,21 @@ export default function Dashboard() {
                     <p className="text-gray-400 text-sm line-clamp-2">{campaign.campaign_description}</p>
                   </div>
                   <span className={`px-2 py-1 text-xs rounded-full whitespace-nowrap ml-2 ${
-                    campaign.status === 'paid' 
-                      ? 'bg-green-900/50 text-green-400' 
-                      : 'bg-gray-800 text-gray-400'
+                    campaign.job_status?.status === 'completed' 
+                      ? 'bg-emerald-950/50 text-emerald-300 border border-emerald-900/50'
+                      : campaign.job_status?.status === 'failed'
+                      ? 'bg-rose-950/50 text-rose-300 border border-rose-900/50'
+                      : campaign.job_status?.status === 'processing'
+                      ? 'bg-blue-950/50 text-blue-300 border border-blue-900/50'
+                      : campaign.status === 'paid' || campaign.status === 'submitted'
+                      ? 'bg-amber-950/50 text-amber-300 border border-amber-900/50'
+                      : 'bg-gray-900 text-gray-500 border border-gray-800'
                   }`}>
-                    {campaign.status === 'paid' ? 'Ongoing' : 'Pending'}
+                    {campaign.job_status?.status 
+                      ? campaign.job_status.status.charAt(0).toUpperCase() + campaign.job_status.status.slice(1)
+                      : campaign.status === 'paid' || campaign.status === 'submitted' 
+                      ? 'Ongoing' 
+                      : 'Pending'}
                   </span>
                 </div>
                 <div className="space-y-1 text-sm text-gray-500">
@@ -130,8 +144,21 @@ export default function Dashboard() {
                   Complete Payment
                 </button>
               ) : (
-                <div className="w-full mt-4 bg-green-900/30 border border-green-700 text-green-400 font-medium py-2 px-4 rounded-lg text-center">
-                  Campaign Ongoing
+                <div className="w-full mt-4 space-y-2">
+                  <div className="w-full bg-emerald-950/30 border border-emerald-900/40 text-emerald-200 font-medium py-2 px-4 rounded-lg text-center">
+                    Campaign Ongoing
+                  </div>
+                  {campaign.job_id && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        checkJobStatus(campaign.id, true);
+                      }}
+                      className="w-full bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors"
+                    >
+                      Check Status
+                    </button>
+                  )}
                 </div>
               )}
             </motion.div>
@@ -147,16 +174,17 @@ export default function Dashboard() {
           campaign={paymentCampaign}
           onSuccess={async (txHash) => {
             if (!did) {
-              alert('DID not found. Please connect your wallet first.');
+              showToast('DID not found. Please connect your wallet first.', 'error');
               return;
             }
             try {
               await submitCampaign(paymentCampaign.id, txHash, did);
               setPaymentCampaign(null);
-              alert('Payment successful! Transaction Hash: ' + txHash);
+              showToast('Payment successful! Campaign submitted.', 'success');
+              console.log('Transaction Hash:', txHash);
             } catch (error) {
               console.error('Failed to process payment:', error);
-              alert('Payment processed but failed to update campaign status.');
+              showToast('Payment processed but failed to update campaign status.', 'error');
             }
           }}
         />
@@ -184,11 +212,21 @@ export default function Dashboard() {
                 <div className="flex-1">
                   <h2 className="text-2xl font-bold mb-2">{selectedCampaign.campaign_name}</h2>
                   <span className={`px-3 py-1 text-xs rounded-full ${
-                    selectedCampaign.status === 'paid'
-                      ? 'bg-green-900/50 text-green-400'
-                      : 'bg-gray-800 text-gray-400'
+                    selectedCampaign.job_status?.status === 'completed' 
+                      ? 'bg-emerald-950/50 text-emerald-300 border border-emerald-900/50'
+                      : selectedCampaign.job_status?.status === 'failed'
+                      ? 'bg-rose-950/50 text-rose-300 border border-rose-900/50'
+                      : selectedCampaign.job_status?.status === 'processing'
+                      ? 'bg-blue-950/50 text-blue-300 border border-blue-900/50'
+                      : selectedCampaign.status === 'paid' || selectedCampaign.status === 'submitted'
+                      ? 'bg-amber-950/50 text-amber-300 border border-amber-900/50'
+                      : 'bg-gray-900 text-gray-500 border border-gray-800'
                   }`}>
-                    {selectedCampaign.status === 'paid' ? 'Campaign Ongoing' : 'Pending Payment'}
+                    {selectedCampaign.job_status?.status 
+                      ? `Campaign ${selectedCampaign.job_status.status.charAt(0).toUpperCase() + selectedCampaign.job_status.status.slice(1)}`
+                      : selectedCampaign.status === 'paid' || selectedCampaign.status === 'submitted'
+                      ? 'Campaign Ongoing' 
+                      : 'Pending Payment'}
                   </span>
                 </div>
                 <button
@@ -248,6 +286,35 @@ export default function Dashboard() {
                   <h3 className="text-sm font-medium text-gray-400 mb-2">Created</h3>
                   <p className="text-white">{new Date(selectedCampaign.created_at).toLocaleString()}</p>
                 </div>
+
+                {/* Job ID and Status */}
+                {selectedCampaign.job_id && (
+                  <div className="border-t border-gray-800 pt-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-sm font-medium text-gray-400">Job Information</h3>
+                      <button
+                        onClick={() => checkJobStatus(selectedCampaign.id, true)}
+                        className="bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors"
+                      >
+                        View Full Status
+                      </button>
+                    </div>
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-xs text-gray-500 mb-1">Job ID</p>
+                        <p className="text-white font-mono text-sm">{selectedCampaign.job_id}</p>
+                      </div>
+                      {selectedCampaign.job_status && (
+                        <div>
+                          <p className="text-xs text-gray-500 mb-1">Status</p>
+                          <pre className="text-white font-mono text-xs bg-gray-800 p-3 rounded overflow-x-auto">
+                            {JSON.stringify(selectedCampaign.job_status, null, 2)}
+                          </pre>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Footer Actions */}

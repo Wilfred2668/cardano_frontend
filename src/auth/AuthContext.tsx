@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { createDid, loadDid, signWithDid, clearDid, hasDid, importDid, exportDid, downloadDidBackup } from '../wallet/did';
 import { getChallenge, verifyAuthentication } from '../api/auth';
+import { setAuthToken, clearAuthTokens, getAuthToken, isTokenExpired } from '../utils/apiClient';
 
 interface AuthContextType {
   did: string | null;
@@ -27,8 +28,6 @@ export const useAuth = () => {
   return context;
 };
 
-const JWT_STORAGE_KEY = 'rize_jwt';
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [did, setDid] = useState<string | null>(null);
   const [jwt, setJwt] = useState<string | null>(null);
@@ -42,9 +41,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setDid(existingDid.did);
     }
 
-    const existingJwt = localStorage.getItem(JWT_STORAGE_KEY);
+    const existingJwt = getAuthToken();
     if (existingJwt) {
-      setJwt(existingJwt);
+      // Check if token is expired
+      if (isTokenExpired()) {
+        console.log('Token expired on mount, clearing...');
+        clearAuthTokens();
+      } else {
+        setJwt(existingJwt);
+      }
     }
   }, []);
 
@@ -119,9 +124,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       console.log('Authentication successful!');
 
-      // Step 4: Store JWT
+      // Step 4: Store JWT with expiry (default 24 hours if not provided by backend)
       setJwt(authResponse.access_token);
-      localStorage.setItem(JWT_STORAGE_KEY, authResponse.access_token);
+      setAuthToken(authResponse.access_token, 24 * 60 * 60); // 24 hours in seconds
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Authentication failed';
@@ -143,9 +148,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // clearDid();
     // setDid(null);
     
-    // Only clear JWT token
+    // Clear JWT token and expiry using apiClient utility
     setJwt(null);
-    localStorage.removeItem(JWT_STORAGE_KEY);
+    clearAuthTokens();
     setError(null);
   };
 

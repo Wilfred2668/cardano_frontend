@@ -1,15 +1,5 @@
-export default function HeroIllustration() {
-  return (
-    <svg
-      className="w-auto max-w-[16rem] h-40 text-gray-800 dark:text-white"
-      aria-hidden="true"
-      width="806"
-      height="593"
-      viewBox="0 0 806 593"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path d="M40 69H707L707 587C707 590.314 704.314 593 701 593H46.9871C43.6778 593 40.9934 590.321 40.9871 587.011L40 69Z" fill="#1C2634"/>
+<svg class="w-auto max-w-[16rem] h-40 text-gray-800 dark:text-white" aria-hidden="true" width="806" height="593" viewBox="0 0 806 593" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M40 69H707L707 587C707 590.314 704.314 593 701 593H46.9871C43.6778 593 40.9934 590.321 40.9871 587.011L40 69Z" fill="#1C2634"/>
 <path d="M40 56.0003C39.9998 52.6865 42.6862 50 46 50L702.001 50C705.314 50 708.001 52.6863 708.001 56V69H40.0006L40 56.0003Z" fill="#1C2634"/>
 <path fill-rule="evenodd" clip-rule="evenodd" d="M40 69H708V70H40V69Z" fill="#374151"/>
 <path d="M59.3223 59.0166C59.3223 61.1508 57.5922 62.8809 55.458 62.8809C53.3238 62.8809 51.5938 61.1508 51.5938 59.0166C51.5938 56.8824 53.3238 55.1523 55.458 55.1523C57.5922 55.1523 59.3223 56.8824 59.3223 59.0166Z" fill="#374151"/>
@@ -161,6 +151,4 @@ export default function HeroIllustration() {
 <stop offset="1" stop-color="#c8d8fa" stop-opacity="0"/>
 </linearGradient>
 </defs>
-    </svg>
-  );
-}
+</svg>
